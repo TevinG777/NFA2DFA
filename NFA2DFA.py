@@ -169,7 +169,8 @@ class NFAtoDFAApp(ctk.CTk):
                     if nfa_state in nfa_transitions and symbol in nfa_transitions[nfa_state]:
                         target_states = nfa_transitions[nfa_state][symbol].split(",")
                         for target in target_states:
-                            reachable_states.update(lambda_closures[target.strip()])
+                            if target.strip() != 'NULL':
+                                reachable_states.update(lambda_closures[target.strip()])
 
                 reachable_closure = frozenset(reachable_states)
                 dfa_transitions[current_dfa_state][symbol] = reachable_closure
