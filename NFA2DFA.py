@@ -127,7 +127,11 @@ class NFAtoDFAApp(ctk.CTk):
 
         # Grab each row from the transitions
         for row in transitions:
+            
+            # Add the starting state to the set of NFA starting with the initial state at the top
             starting_state = row[0]
+            
+            # Add the starting state to the set of NFA states
             nfa_states.add(starting_state)
 
             # Initialize transition dictionary with NULL for all symbols
