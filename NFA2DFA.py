@@ -8,7 +8,6 @@ class NFAtoDFAApp(ctk.CTk):
         self.title("NFA to DFA Conversion Tool")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
-        self.geometry("600x400")
         self.number_of_symbols = 0
         self.transition_entries = []
         self.add_row_button = None
@@ -37,6 +36,10 @@ class NFAtoDFAApp(ctk.CTk):
             self.number_of_symbols = int(self.symbol_entry.get())
             if self.number_of_symbols < 1:
                 raise ValueError
+            # Adjust window size based on the number of symbols
+            new_width = 600 + (self.number_of_symbols * 50)
+            new_height = 400 + (self.number_of_symbols * 20)
+            self.geometry(f"{new_width}x{new_height}")
             self.setup_transition_table_page()  # Move to the next page to input transitions
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a positive integer.")
@@ -121,6 +124,9 @@ class NFAtoDFAApp(ctk.CTk):
         return closure
 
     def perform_nfa_to_dfa_conversion(self, transitions):
+        # Define instance attributes for DFA states and transitions
+        self.dfa_states = []
+        self.dfa_transitions = {}
         # Pull out the transitions from the input
         nfa_states = set()
         nfa_symbols = set()
@@ -151,13 +157,14 @@ class NFAtoDFAApp(ctk.CTk):
 
         # Start with the lambda closure of the initial state
         initial_closure = frozenset(lambda_closures['q0'])
-        dfa_states.append(initial_closure)
+        self.dfa_states.append(initial_closure)
         unprocessed_states.append(initial_closure)
 
         # Process all unprocessed DFA states
         while unprocessed_states:
             current_dfa_state = unprocessed_states.pop(0)
-            dfa_transitions[current_dfa_state] = {}
+            if current_dfa_state not in self.dfa_transitions:
+                self.dfa_transitions[current_dfa_state] = {}
 
             # For each input symbol (except lambda)
             for symbol in nfa_symbols:
@@ -174,20 +181,20 @@ class NFAtoDFAApp(ctk.CTk):
                                 reachable_states.update(lambda_closures[target.strip()])
 
                 reachable_closure = frozenset(reachable_states)
-                dfa_transitions[current_dfa_state][symbol] = reachable_closure
+                self.dfa_transitions[current_dfa_state][symbol] = reachable_closure
 
                 # If this new state is not already in the DFA states, add it
-                if reachable_closure not in dfa_states:
-                    dfa_states.append(reachable_closure)
+                if reachable_closure not in self.dfa_states:
+                    self.dfa_states.append(reachable_closure)
                     unprocessed_states.append(reachable_closure)
 
         # Print the DFA components for verification
-        print("DFA States:", [f"{{{', '.join(state)}}}" if state else "{∅}" for state in dfa_states])
+        print("DFA States:", [f"{{{', '.join(state)}}}" if state else "{\u2205}" for state in self.dfa_states])
         print("DFA Transitions:")
-        for state, transitions in dfa_transitions.items():
-            state_str = f"{{{', '.join(state)}}}" if state else "{∅}"
-        transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{∅}") for symbol, target_state in transitions.items()}
-        print(f"  {state_str}: {transitions_str}")
+        for state, transitions in self.dfa_transitions.items():
+            state_str = f"{{{', '.join(state)}}}" if state else "{\u2205}"
+            transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{\u2205}") for symbol, target_state in transitions.items()}
+            print(f"  {state_str}: {transitions_str}")
 
     def show_dfa_table(self):
         # Clear current window
@@ -202,16 +209,22 @@ class NFAtoDFAApp(ctk.CTk):
         dfa_output = ctk.CTkTextbox(self, width=500, height=300)
         dfa_output.pack(pady=10)
 
-        # Print DFA states and transitions to the text box
-        dfa_output.insert("end", "DFA States:")
-        dfa_output.insert("end", [f"{{{', '.join(state)}}}" if state else "{∅}" for state in self.dfa_states])
-        dfa_output.insert("end", "DFA Transitions:")
+        # Print DFA states and transitions to the text box in table format
+        dfa_output.insert("end", "DFA Transition Table:\n")
+        dfa_output.insert("end", f"{'State':<20}")
+        for symbol in sorted([sym for sym in self.dfa_transitions[next(iter(self.dfa_transitions))].keys() if sym != 'λ']):
+            dfa_output.insert("end", f"{symbol:<20}")
+        dfa_output.insert("end", "\n")
+
         for state, transitions in self.dfa_transitions.items():
             if not state:
                 continue  # Skip empty set state
             state_str = f"{{{', '.join(state)}}}"
-            transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{∅}") for symbol, target_state in transitions.items()}
-            dfa_output.insert("end", f"  {state_str}: {transitions_str}")
+            dfa_output.insert("end", f"{state_str:<20}")
+            for symbol in sorted([sym for sym in transitions.keys() if sym != 'λ']):
+                target_state_str = f"{{{', '.join(transitions[symbol])}}}" if transitions[symbol] else "{\u2205}"
+                dfa_output.insert("end", f"{target_state_str:<20}")
+            dfa_output.insert("end", "\n")
 
         # Button to go back to the beginning
         restart_button = ctk.CTkButton(self, text="Restart", command=self.setup_symbol_entry_page)
