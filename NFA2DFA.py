@@ -4,6 +4,7 @@ import string
 
 class NFAtoDFAApp(ctk.CTk):
     def __init__(self):
+        # Initialize the main window
         super().__init__()
         self.title("NFA to DFA Conversion Tool")
         ctk.set_appearance_mode("dark")
@@ -12,8 +13,11 @@ class NFAtoDFAApp(ctk.CTk):
         self.transition_entries = []
         self.add_row_button = None
         self.submit_button = None
+        
+        # Initialize the DFA components page
         self.setup_symbol_entry_page()
 
+    
     def setup_symbol_entry_page(self):
         # Clear current window
         for widget in self.winfo_children():
@@ -32,6 +36,8 @@ class NFAtoDFAApp(ctk.CTk):
         submit_button.pack(pady=20)
 
     def get_number_of_symbols(self):
+        
+        # try to convert the input to an integer if failed show an error message
         try:
             self.number_of_symbols = int(self.symbol_entry.get())
             if self.number_of_symbols < 1:
@@ -91,14 +97,24 @@ class NFAtoDFAApp(ctk.CTk):
     def submit_transitions(self):
         nfa_symbols = set()  # Ensure nfa_symbols is defined
         transitions = []
+        
+        # Process each row of the transition table
         for row_entries in self.transition_entries:
+            
+            # Extract the data from the row
             row_data = []
+            
+            # Starting state is the first entry in the row
             starting_state = row_entries[0].get() if row_entries[0].get() != "" else "NULL"
             row_data.append(starting_state)
+            
+            # Process each input symbol transition in the row
             for i in range(1, len(row_entries)):
                 input_symbol = string.ascii_lowercase[i - 1] if i <= self.number_of_symbols else "λ"
                 transition_state = row_entries[i].get() if row_entries[i].get() != "" else "NULL"
                 row_data.append((input_symbol, transition_state))
+                
+                # If the transition state is not NULL, add the input symbol to the set of NFA symbols
                 if transition_state == "NULL":
                     nfa_symbols.add(input_symbol)
             transitions.append(row_data)
@@ -109,14 +125,18 @@ class NFAtoDFAApp(ctk.CTk):
         self.perform_nfa_to_dfa_conversion(transitions)
         self.show_dfa_table()
 
+    # Function to calculate the lambda closure of a state in the NFA
     def lambda_closure(self, state, nfa_transitions, visited=None):
         if visited is None:
             visited = set()
         if state in visited:
             return set()
 
+        # Add the current state to the visited set and the closure set
         visited.add(state)
         closure = set([state])
+        
+        # If the state has a lambda transition, add the lambda closure of the target states
         if state in nfa_transitions and "λ" in nfa_transitions[state]:
             for target in nfa_transitions[state]["λ"].split(","):
                 closure.update(self.lambda_closure(target.strip(), nfa_transitions, visited))
@@ -172,13 +192,20 @@ class NFAtoDFAApp(ctk.CTk):
 
                 # Calculate the set of NFA states reachable from the current DFA state using the symbol
                 reachable_states = set()
+                
+                # For each NFA state in the current DFA state, find the target states for the symbol
                 for nfa_state in current_dfa_state:
+                    
+                    # If the NFA state has a transition for the symbol, add the target states to the reachable set
                     if nfa_state in nfa_transitions and symbol in nfa_transitions[nfa_state]:
                         target_states = nfa_transitions[nfa_state][symbol].split(",")
                         for target in target_states:
+                            
+                            # Add the lambda closure of the target state to the reachable set
                             if target.strip() != 'NULL':
                                 reachable_states.update(lambda_closures[target.strip()])
 
+                # If there are reachable states, add the closure to the DFA transitions
                 reachable_closure = frozenset(reachable_states)
                 self.dfa_transitions[current_dfa_state][symbol] = reachable_closure
 
@@ -195,6 +222,7 @@ class NFAtoDFAApp(ctk.CTk):
             transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{\u2205}") for symbol, target_state in transitions.items()}
             print(f"  {state_str}: {transitions_str}")
 
+    # Display the DFA transition table
     def show_dfa_table(self):
         # Clear current window
         for widget in self.winfo_children():
