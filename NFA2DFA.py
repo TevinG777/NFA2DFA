@@ -105,6 +105,7 @@ class NFAtoDFAApp(ctk.CTk):
         messagebox.showinfo("Transitions Submitted", "Transition table has been submitted.")
         # Call the backend NFA to DFA conversion here
         self.perform_nfa_to_dfa_conversion(transitions)
+        self.show_dfa_table()
 
     def lambda_closure(self, state, nfa_transitions, visited=None):
         if visited is None:
@@ -127,11 +128,7 @@ class NFAtoDFAApp(ctk.CTk):
 
         # Grab each row from the transitions
         for row in transitions:
-            
-            # Add the starting state to the set of NFA starting with the initial state at the top
             starting_state = row[0]
-            
-            # Add the starting state to the set of NFA states
             nfa_states.add(starting_state)
 
             # Initialize transition dictionary with NULL for all symbols
@@ -193,8 +190,32 @@ class NFAtoDFAApp(ctk.CTk):
         print(f"  {state_str}: {transitions_str}")
 
     def show_dfa_table(self):
-        # Placeholder for displaying DFA table after conversion
-        self.setup_symbol_entry_page()  # For now, restart by going back to the first page
+        # Clear current window
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Heading
+        heading_label = ctk.CTkLabel(self, text="DFA Transition Table")
+        heading_label.pack(pady=10)
+
+        # Output DFA states and transitions
+        dfa_output = ctk.CTkTextbox(self, width=500, height=300)
+        dfa_output.pack(pady=10)
+
+        # Print DFA states and transitions to the text box
+        dfa_output.insert("end", "DFA States:")
+        dfa_output.insert("end", [f"{{{', '.join(state)}}}" if state else "{∅}" for state in self.dfa_states])
+        dfa_output.insert("end", "DFA Transitions:")
+        for state, transitions in self.dfa_transitions.items():
+            if not state:
+                continue  # Skip empty set state
+            state_str = f"{{{', '.join(state)}}}"
+            transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{∅}") for symbol, target_state in transitions.items()}
+            dfa_output.insert("end", f"  {state_str}: {transitions_str}")
+
+        # Button to go back to the beginning
+        restart_button = ctk.CTkButton(self, text="Restart", command=self.setup_symbol_entry_page)
+        restart_button.pack(pady=20)
 
 if __name__ == "__main__":
     app = NFAtoDFAApp()
