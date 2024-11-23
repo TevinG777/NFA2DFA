@@ -181,10 +181,12 @@ class NFAtoDFAApp(ctk.CTk):
                     unprocessed_states.append(reachable_closure)
 
         # Print the DFA components for verification
-        print("DFA States:", dfa_states)
+        print("DFA States:", [f"{{{', '.join(state)}}}" if state else "{∅}" for state in dfa_states])
         print("DFA Transitions:")
         for state, transitions in dfa_transitions.items():
-            print(f"  {state}: {transitions}")
+            state_str = f"{{{', '.join(state)}}}" if state else "{∅}"
+        transitions_str = {symbol: (f"{{{', '.join(target_state)}}}" if target_state else "{∅}") for symbol, target_state in transitions.items()}
+        print(f"  {state_str}: {transitions_str}")
 
     def show_dfa_table(self):
         # Placeholder for displaying DFA table after conversion
