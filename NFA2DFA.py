@@ -203,32 +203,24 @@ class NFAtoDFAApp(ctk.CTk):
 
         # Heading
         heading_label = ctk.CTkLabel(self, text="DFA Transition Table")
-        heading_label.pack(pady=10)
+        heading_label.grid(row=0, column=0, columnspan=self.number_of_symbols + 2, pady=10)
 
-        # Output DFA states and transitions
-        dfa_output = ctk.CTkTextbox(self, width=500, height=300)
-        dfa_output.pack(pady=10)
+        # Create the column headers for the DFA table
+        ctk.CTkLabel(self, text="State").grid(row=1, column=0, padx=10, pady=5)
+        for i, symbol in enumerate(sorted([sym for sym in self.dfa_transitions[next(iter(self.dfa_transitions))].keys() if sym != 'λ'])):
+            ctk.CTkLabel(self, text=f"Input {symbol}").grid(row=1, column=i + 1, padx=10, pady=5)
 
-        # Print DFA states and transitions to the text box in table format
-        dfa_output.insert("end", "DFA Transition Table:\n")
-        dfa_output.insert("end", f"{'State':<20}")
-        for symbol in sorted([sym for sym in self.dfa_transitions[next(iter(self.dfa_transitions))].keys() if sym != 'λ']):
-            dfa_output.insert("end", f"{symbol:<20}")
-        dfa_output.insert("end", "\n")
-
-        for state, transitions in self.dfa_transitions.items():
-            if not state:
-                continue  # Skip empty set state
+        # Fill in the DFA table with states and transitions
+        for row_index, (state, transitions) in enumerate(self.dfa_transitions.items(), start=2):
             state_str = f"{{{', '.join(state)}}}"
-            dfa_output.insert("end", f"{state_str:<20}")
-            for symbol in sorted([sym for sym in transitions.keys() if sym != 'λ']):
+            ctk.CTkLabel(self, text=state_str).grid(row=row_index, column=0, padx=10, pady=5)
+            for col_index, symbol in enumerate(sorted([sym for sym in transitions.keys() if sym != 'λ'])):
                 target_state_str = f"{{{', '.join(transitions[symbol])}}}" if transitions[symbol] else "{\u2205}"
-                dfa_output.insert("end", f"{target_state_str:<20}")
-            dfa_output.insert("end", "\n")
+                ctk.CTkLabel(self, text=target_state_str).grid(row=row_index, column=col_index + 1, padx=10, pady=5)
 
         # Button to go back to the beginning
         restart_button = ctk.CTkButton(self, text="Restart", command=self.setup_symbol_entry_page)
-        restart_button.pack(pady=20)
+        restart_button.grid(row=row_index + 1, column=0, columnspan=self.number_of_symbols + 2, pady=20)
 
 if __name__ == "__main__":
     app = NFAtoDFAApp()
