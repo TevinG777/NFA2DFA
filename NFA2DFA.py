@@ -103,7 +103,6 @@ class NFAtoDFAApp(ctk.CTk):
                     nfa_symbols.add(input_symbol)
             transitions.append(row_data)
 
-        # Here, you can add the logic to handle the transitions and convert the NFA to DFA
         # For now, we'll just display a confirmation message
         messagebox.showinfo("Transitions Submitted", "Transition table has been submitted.")
         # Call the backend NFA to DFA conversion here
