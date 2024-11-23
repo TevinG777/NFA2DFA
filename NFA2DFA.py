@@ -54,11 +54,11 @@ class NFAtoDFAApp(ctk.CTk):
         heading_label.grid(row=0, column=0, columnspan=self.number_of_symbols + 3, pady=10)
 
         # Create the column headers
-        ctk.CTkLabel(self, text="Starting State").grid(row=1, column=0, padx=10, pady=5)
+        ctk.CTkLabel(self, text="Starting State", corner_radius=5, border_width=2, border_color="gray").grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
         for i in range(self.number_of_symbols):
             input_symbol = string.ascii_lowercase[i]
-            ctk.CTkLabel(self, text=f"Input {input_symbol}").grid(row=1, column=i + 1, padx=10, pady=5)
-        ctk.CTkLabel(self, text="Input λ").grid(row=1, column=self.number_of_symbols + 1, padx=10, pady=5)
+            ctk.CTkLabel(self, text=f"Input {input_symbol}", corner_radius=5, border_width=2, border_color="gray").grid(row=1, column=i + 1, padx=10, pady=5, sticky="nsew")
+        ctk.CTkLabel(self, text="Input λ", corner_radius=5, border_width=2, border_color="gray").grid(row=1, column=self.number_of_symbols + 1, padx=10, pady=5, sticky="nsew")
 
         # Button to add rows dynamically
         self.add_row_button = ctk.CTkButton(self, text="Add Row", command=self.add_transition_row)
@@ -73,13 +73,13 @@ class NFAtoDFAApp(ctk.CTk):
         row_entries = []
 
         # Add entries for starting state and all input symbols including lambda
-        starting_state_entry = ctk.CTkEntry(self)
-        starting_state_entry.grid(row=row_number, column=0, padx=10, pady=5)
+        starting_state_entry = ctk.CTkEntry(self, corner_radius=5, border_width=2, border_color="gray")
+        starting_state_entry.grid(row=row_number, column=0, padx=10, pady=5, sticky="nsew")
         row_entries.append(starting_state_entry)
 
         for i in range(self.number_of_symbols + 1):  # Including lambda column
-            entry = ctk.CTkEntry(self)
-            entry.grid(row=row_number, column=i + 1, padx=10, pady=5)
+            entry = ctk.CTkEntry(self, corner_radius=5, border_width=2, border_color="gray")
+            entry.grid(row=row_number, column=i + 1, padx=10, pady=5, sticky="nsew")
             row_entries.append(entry)
 
         self.transition_entries.append(row_entries)
@@ -206,17 +206,17 @@ class NFAtoDFAApp(ctk.CTk):
         heading_label.grid(row=0, column=0, columnspan=self.number_of_symbols + 2, pady=10)
 
         # Create the column headers for the DFA table
-        ctk.CTkLabel(self, text="State").grid(row=1, column=0, padx=10, pady=5)
+        ctk.CTkLabel(self, text="State", corner_radius=5, border_width=2, border_color="gray").grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
         for i, symbol in enumerate(sorted([sym for sym in self.dfa_transitions[next(iter(self.dfa_transitions))].keys() if sym != 'λ'])):
-            ctk.CTkLabel(self, text=f"Input {symbol}").grid(row=1, column=i + 1, padx=10, pady=5)
+            ctk.CTkLabel(self, text=f"Input {symbol}", corner_radius=5, border_width=2, border_color="gray").grid(row=1, column=i + 1, padx=10, pady=5, sticky="nsew")
 
         # Fill in the DFA table with states and transitions
         for row_index, (state, transitions) in enumerate(self.dfa_transitions.items(), start=2):
             state_str = f"{{{', '.join(state)}}}"
-            ctk.CTkLabel(self, text=state_str).grid(row=row_index, column=0, padx=10, pady=5)
+            ctk.CTkLabel(self, text=state_str, corner_radius=5, border_width=2, border_color="gray").grid(row=row_index, column=0, padx=10, pady=5, sticky="nsew")
             for col_index, symbol in enumerate(sorted([sym for sym in transitions.keys() if sym != 'λ'])):
                 target_state_str = f"{{{', '.join(transitions[symbol])}}}" if transitions[symbol] else "{\u2205}"
-                ctk.CTkLabel(self, text=target_state_str).grid(row=row_index, column=col_index + 1, padx=10, pady=5)
+                ctk.CTkLabel(self, text=target_state_str, corner_radius=5, border_width=2, border_color="gray").grid(row=row_index, column=col_index + 1, padx=10, pady=5, sticky="nsew")
 
         # Button to go back to the beginning
         restart_button = ctk.CTkButton(self, text="Restart", command=self.setup_symbol_entry_page)
